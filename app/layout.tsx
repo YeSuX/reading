@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   keywords: ['读书笔记', '阅读', '笔记', '书籍', '学习'],
   authors: [{ name: '苏雄' }],
   creator: '苏雄',
-  metadataBase: new URL('https://reading.suxiong.me'),
+  metadataBase: new URL('https://reading.suxiong.com'),
   openGraph: {
     type: 'website',
     locale: 'zh_CN',

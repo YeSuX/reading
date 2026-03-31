@@ -12,14 +12,29 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookOpen, FileText, ArrowRight } from "lucide-react";
 
+function getPageTimestamp(date?: string) {
+  if (!date) return 0;
+
+  const value = Date.parse(date);
+  return Number.isNaN(value) ? 0 : value;
+}
+
 export default function HomePage() {
   // 获取所有书籍（根级别的页面）
   const allPages = source.getPages();
   const books = allPages.filter((page) => page.slugs.length === 1);
+  const chapters = allPages
+    .filter((page) => page.slugs.length > 1)
+    .sort((a, b) => {
+      const dateDiff = getPageTimestamp(b.data.date) - getPageTimestamp(a.data.date);
+      if (dateDiff !== 0) return dateDiff;
+
+      return a.url.localeCompare(b.url, "zh-CN");
+    });
 
   // 统计信息
   const totalBooks = books.length;
-  const totalChapters = allPages.filter((page) => page.slugs.length > 1).length;
+  const totalChapters = chapters.length;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -55,7 +70,7 @@ export default function HomePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {books.map((book) => {
           // 获取该书籍下的所有章节
-          const chapters = allPages.filter(
+          const bookChapters = chapters.filter(
             (page) => page.slugs.length > 1 && page.slugs[0] === book.slugs[0]
           );
 
@@ -64,7 +79,7 @@ export default function HomePage() {
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
                   <BookOpen className="size-5 text-primary" />
-                  <Badge variant="secondary">{chapters.length} 章节</Badge>
+                  <Badge variant="secondary">{bookChapters.length} 章节</Badge>
                 </div>
                 <CardTitle className="text-xl">{book.data.title}</CardTitle>
                 {book.data.description && (
@@ -74,11 +89,11 @@ export default function HomePage() {
                 )}
               </CardHeader>
 
-              {chapters.length > 0 && (
+              {bookChapters.length > 0 && (
                 <CardContent>
                   <div className="space-y-1">
                     <p className="text-sm font-medium mb-2">最近章节：</p>
-                    {chapters.slice(0, 3).map((chapter) => (
+                    {bookChapters.slice(0, 3).map((chapter) => (
                       <Link
                         key={chapter.url}
                         href={chapter.url}
